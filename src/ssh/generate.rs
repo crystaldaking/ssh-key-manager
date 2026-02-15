@@ -2,6 +2,7 @@ use rand::rngs::OsRng;
 use ssh_key::{Algorithm, PrivateKey};
 use std::fs::OpenOptions;
 use std::io::Write;
+#[cfg(unix)]
 use std::os::unix::fs::OpenOptionsExt;
 use std::path::{Path, PathBuf};
 
@@ -95,11 +96,20 @@ impl KeyGenerator {
             .to_openssh(ssh_key::LineEnding::default())
             .map_err(|e| SkmError::SshKey(e.to_string()))?;
 
+        #[cfg(unix)]
         let mut file = OpenOptions::new()
             .write(true)
             .create(true)
             .truncate(true)
             .mode(0o600)
+            .open(path)
+            .map_err(SkmError::Io)?;
+
+        #[cfg(not(unix))]
+        let mut file = OpenOptions::new()
+            .write(true)
+            .create(true)
+            .truncate(true)
             .open(path)
             .map_err(SkmError::Io)?;
 
@@ -111,11 +121,20 @@ impl KeyGenerator {
     fn write_public_key(&self, path: &Path, key_data: &str, comment: &str) -> Result<()> {
         let content = format!("{} {}", key_data, comment);
 
+        #[cfg(unix)]
         let mut file = OpenOptions::new()
             .write(true)
             .create(true)
             .truncate(true)
             .mode(0o644)
+            .open(path)
+            .map_err(SkmError::Io)?;
+
+        #[cfg(not(unix))]
+        let mut file = OpenOptions::new()
+            .write(true)
+            .create(true)
+            .truncate(true)
             .open(path)
             .map_err(SkmError::Io)?;
 

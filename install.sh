@@ -1,11 +1,11 @@
 #!/bin/bash
 
 # SSH Key Manager - Installation Script
-# Usage: curl -sSL https://raw.githubusercontent.com/YOUR_USERNAME/ssh-key-manager/main/install.sh | bash
+# Usage: curl -sSL https://raw.githubusercontent.com/crystaldaking/ssh-key-manager/main/install.sh | bash
 
 set -e
 
-REPO="YOUR_USERNAME/ssh-key-manager"
+REPO="crystaldaking/ssh-key-manager"
 INSTALL_DIR="/usr/local/bin"
 BINARY_NAME="skm"
 

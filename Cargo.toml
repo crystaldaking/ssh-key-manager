@@ -2,11 +2,11 @@
 name = "ssh-key-manager"
 version = "0.1.0"
 edition = "2024"
-authors = ["SSH Key Manager Contributors"]
+authors = ["crystal@crystalapps.by"]
 description = "TUI/CLI application for managing SSH keys"
 license = "MIT"
-repository = "https://github.com/YOUR_USERNAME/ssh-key-manager"
-homepage = "https://github.com/YOUR_USERNAME/ssh-key-manager"
+repository = "https://github.com/crystaldaking/ssh-key-manager"
+homepage = "https://github.com/crystaldaking/ssh-key-manager"
 readme = "README.md"
 keywords = ["ssh", "key", "manager", "tui", "cli"]
 categories = ["command-line-utilities", "development-tools"]

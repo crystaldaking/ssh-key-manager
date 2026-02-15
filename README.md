@@ -2,7 +2,7 @@
 
 TUI/CLI application for managing SSH keys on macOS, Linux, and Windows (including WSL).
 
-[![CI](https://github.com/YOUR_USERNAME/ssh-key-manager/workflows/CI/badge.svg)](https://github.com/YOUR_USERNAME/ssh-key-manager/actions)
+[![CI](https://github.com/crystaldaking/ssh-key-manager/workflows/CI/badge.svg)](https://github.com/crystaldaking/ssh-key-manager/actions)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 ## Features
@@ -35,48 +35,48 @@ sudo snap connect ssh-key-manager:ssh-keys
 ### Quick Install (Linux/macOS)
 
 ```bash
-curl -sSL https://raw.githubusercontent.com/YOUR_USERNAME/ssh-key-manager/main/install.sh | bash
+curl -sSL https://raw.githubusercontent.com/crystaldaking/ssh-key-manager/main/install.sh | bash
 ```
 
 Or with custom install directory:
 ```bash
-curl -sSL https://raw.githubusercontent.com/YOUR_USERNAME/ssh-key-manager/main/install.sh | bash -s ~/.local/bin
+curl -sSL https://raw.githubusercontent.com/crystaldaking/ssh-key-manager/main/install.sh | bash -s ~/.local/bin
 ```
 
 ### Manual Installation
 
-Download the latest binary from [GitHub Releases](https://github.com/YOUR_USERNAME/ssh-key-manager/releases):
+Download the latest binary from [GitHub Releases](https://github.com/crystaldaking/ssh-key-manager/releases):
 
 **Linux:**
 ```bash
-curl -LO https://github.com/YOUR_USERNAME/ssh-key-manager/releases/latest/download/skm-linux-amd64
+curl -LO https://github.com/crystaldaking/ssh-key-manager/releases/latest/download/skm-linux-amd64
 chmod +x skm-linux-amd64
 sudo mv skm-linux-amd64 /usr/local/bin/skm
 ```
 
 **macOS (Intel):**
 ```bash
-curl -LO https://github.com/YOUR_USERNAME/ssh-key-manager/releases/latest/download/skm-macos-amd64
+curl -LO https://github.com/crystaldaking/ssh-key-manager/releases/latest/download/skm-macos-amd64
 chmod +x skm-macos-amd64
 sudo mv skm-macos-amd64 /usr/local/bin/skm
 ```
 
 **macOS (Apple Silicon):**
 ```bash
-curl -LO https://github.com/YOUR_USERNAME/ssh-key-manager/releases/latest/download/skm-macos-arm64
+curl -LO https://github.com/crystaldaking/ssh-key-manager/releases/latest/download/skm-macos-arm64
 chmod +x skm-macos-arm64
 sudo mv skm-macos-arm64 /usr/local/bin/skm
 ```
 
 **Windows:**
-Download `skm-windows-amd64.exe` from [Releases](https://github.com/YOUR_USERNAME/ssh-key-manager/releases) and rename to `skm.exe`.
+Download `skm-windows-amd64.exe` from [Releases](https://github.com/crystaldaking/ssh-key-manager/releases) and rename to `skm.exe`.
 
 ### From Source
 
 Requires Rust 1.85+:
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/ssh-key-manager
+git clone https://github.com/crystaldaking/ssh-key-manager
 cd ssh-key-manager
 cargo build --release
 # Binary will be at target/release/skm
@@ -333,7 +333,7 @@ sudo snap connect ssh-key-manager:ssh-keys
 ### Build Commands
 ```bash
 # Clone repository
-git clone https://github.com/YOUR_USERNAME/ssh-key-manager
+git clone https://github.com/crystaldaking/ssh-key-manager
 cd ssh-key-manager
 
 # Build debug version

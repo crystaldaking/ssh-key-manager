@@ -105,12 +105,8 @@ fn run_app<B: ratatui::backend::Backend>(terminal: &mut Terminal<B>, app: &mut A
             .checked_sub(last_tick.elapsed())
             .unwrap_or_else(|| std::time::Duration::from_secs(0));
 
-        if crossterm::event::poll(timeout)? {
-            if handle_events(app)? {
-                if app.should_quit() {
-                    break;
-                }
-            }
+        if crossterm::event::poll(timeout)? && handle_events(app)? && app.should_quit() {
+            break;
         }
 
         // Handle tick events

@@ -59,8 +59,8 @@ impl CliExecutor {
 
                 // Print header
                 println!(
-                    "{:<20} {:<10} {:<20} {}",
-                    "Name", "Type", "Status", "Comment"
+                    "{:<20} {:<10} {:<20} Comment",
+                    "Name", "Type", "Status"
                 );
                 println!("{}", "-".repeat(70));
 
@@ -351,7 +351,7 @@ impl CliExecutor {
             })?;
 
             // Parse "type key_base64 comment" -> "type key_base64"
-            let parts: Vec<&str> = full_content.trim().split_whitespace().collect();
+            let parts: Vec<&str> = full_content.split_whitespace().collect();
             if parts.len() >= 2 {
                 format!("{} {}", parts[0], parts[1])
             } else {

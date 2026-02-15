@@ -456,7 +456,7 @@ fn copy_key_to_clipboard(key: &crate::ssh::keys::SshKey, full: bool) -> Result<(
         })?;
 
         // Parse "type key_base64 comment" -> "type key_base64"
-        let parts: Vec<&str> = full_content.trim().split_whitespace().collect();
+        let parts: Vec<&str> = full_content.split_whitespace().collect();
         if parts.len() >= 2 {
             format!("{} {}", parts[0], parts[1])
         } else {

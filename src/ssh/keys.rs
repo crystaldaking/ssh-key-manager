@@ -151,7 +151,7 @@ impl SshKey {
 
     fn parse_public_key(path: &Path) -> Result<(Option<String>, Option<String>)> {
         let content = std::fs::read_to_string(path)?;
-        let parts: Vec<&str> = content.trim().split_whitespace().collect();
+        let parts: Vec<&str> = content.split_whitespace().collect();
 
         if parts.len() >= 2 {
             let fingerprint = Some(format!("{}...", &parts[1][..parts[1].len().min(16)]));
@@ -190,7 +190,7 @@ impl SshKey {
         }
 
         let content = std::fs::read_to_string(&self.public_path)?;
-        let parts: Vec<&str> = content.trim().split_whitespace().collect();
+        let parts: Vec<&str> = content.split_whitespace().collect();
 
         if parts.len() >= 2 {
             let new_content = format!("{} {} {}", parts[0], parts[1], new_comment);

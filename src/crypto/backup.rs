@@ -36,22 +36,14 @@ pub struct BackupData {
     pub keys: Vec<BackupEntry>,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Default)]
 pub struct ExportOptions {
     pub description: Option<String>,
     pub include_public_only: bool,
     pub selected_keys: Option<Vec<String>>, // None = all keys
 }
 
-impl Default for ExportOptions {
-    fn default() -> Self {
-        Self {
-            description: None,
-            include_public_only: false,
-            selected_keys: None,
-        }
-    }
-}
+// impl Default for ExportOptions removed (derived instead)
 
 #[derive(Debug, Clone)]
 pub struct ImportOptions {

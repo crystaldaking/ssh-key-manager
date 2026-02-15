@@ -52,7 +52,7 @@ impl Config {
 
     pub fn ensure_ssh_dir(&self) -> Result<()> {
         if !self.ssh_dir.exists() {
-            std::fs::create_dir_all(&self.ssh_dir).map_err(|e| SkmError::Io(e))?;
+            std::fs::create_dir_all(&self.ssh_dir).map_err(SkmError::Io)?;
 
             #[cfg(unix)]
             {

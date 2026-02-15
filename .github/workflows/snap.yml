@@ -1,0 +1,57 @@
+name: Build and Publish Snap
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+jobs:
+  build-snap:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        arch: [amd64, arm64]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Build Snap (${{ matrix.arch }})
+        uses: snapcore/action-build@v1
+        id: snapcraft
+        with:
+          snapcraft-args: --target-arch=${{ matrix.arch }}
+
+      - name: Upload Snap Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: snap-${{ matrix.arch }}
+          path: ${{ steps.snapcraft.outputs.snap }}
+
+      - name: Upload to Snap Store (only on tags)
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: snapcore/action-publish@v1
+        env:
+          SNAPCRAFT_STORE_CREDENTIALS: ${{ secrets.SNAPCRAFT_TOKEN }}
+        with:
+          snap: ${{ steps.snapcraft.outputs.snap }}
+          release: stable
+
+  test-snap:
+    needs: build-snap
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download Snap Artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: snap-amd64
+
+      - name: Install Snap for Testing
+        run: |
+          sudo snap install --dangerous *.snap
+
+      - name: Test Snap Commands
+        run: |
+          skm --version
+          skm --help
+          skm list || true  # May fail if no SSH keys, that's ok

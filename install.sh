@@ -6,7 +6,7 @@
 set -e
 
 REPO="crystaldaking/ssh-key-manager"
-INSTALL_DIR="/usr/local/bin"q
+INSTALL_DIR="/usr/local/bin"
 BINARY_NAME="skm"
 
 # Colors

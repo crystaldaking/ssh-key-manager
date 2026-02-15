@@ -58,10 +58,7 @@ impl CliExecutor {
                 }
 
                 // Print header
-                println!(
-                    "{:<20} {:<10} {:<20} Comment",
-                    "Name", "Type", "Status"
-                );
+                println!("{:<20} {:<10} {:<20} Comment", "Name", "Type", "Status");
                 println!("{}", "-".repeat(70));
 
                 // Print keys

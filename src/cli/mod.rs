@@ -108,6 +108,20 @@ pub enum Commands {
         /// Key name
         name: String,
     },
+
+    /// Copy public key to clipboard (or output to stdout)
+    Copy {
+        /// Key name
+        name: String,
+
+        /// Print to stdout instead of copying to clipboard
+        #[arg(short, long)]
+        stdout: bool,
+
+        /// Copy full public key file content (with comment)
+        #[arg(short, long)]
+        full: bool,
+    },
 }
 
 #[derive(Debug, Clone, Copy, clap::ValueEnum)]

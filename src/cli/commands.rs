@@ -42,6 +42,7 @@ impl CliExecutor {
             } => self.cmd_import(file, passphrase, strategy, dry_run),
             Commands::Delete { name, force } => self.cmd_delete(name, force),
             Commands::Show { name } => self.cmd_show(name),
+            Commands::Copy { name, stdout, full } => self.cmd_copy(name, stdout, full),
         }
     }
 
@@ -324,6 +325,63 @@ impl CliExecutor {
         if let Some(content) = key.read_public_content()? {
             println!("\nPublic key content:");
             println!("{}", content.trim());
+        }
+
+        Ok(())
+    }
+
+    fn cmd_copy(&self, name: String, stdout: bool, full: bool) -> Result<()> {
+        use arboard::Clipboard;
+
+        let scanner = KeyScanner::new(&self.config.ssh_dir);
+
+        let key = scanner
+            .find_key_by_name(&name)?
+            .ok_or_else(|| crate::error::SkmError::KeyNotFound(name.clone()))?;
+
+        // Get public key content
+        let content = if full {
+            key.read_public_content()?.ok_or_else(|| {
+                crate::error::SkmError::KeyNotFound(format!("Public key for {}", name))
+            })?
+        } else {
+            // Extract just the key part (without comment)
+            let full_content = key.read_public_content()?.ok_or_else(|| {
+                crate::error::SkmError::KeyNotFound(format!("Public key for {}", name))
+            })?;
+
+            // Parse "type key_base64 comment" -> "type key_base64"
+            let parts: Vec<&str> = full_content.trim().split_whitespace().collect();
+            if parts.len() >= 2 {
+                format!("{} {}", parts[0], parts[1])
+            } else {
+                full_content
+            }
+        };
+
+        if stdout {
+            // Output to stdout (for piping)
+            println!("{}", content.trim());
+        } else {
+            // Copy to clipboard
+            let mut clipboard = Clipboard::new().map_err(|e| {
+                crate::error::SkmError::Unknown(format!("Failed to access clipboard: {}", e))
+            })?;
+
+            clipboard.set_text(content.trim()).map_err(|e| {
+                crate::error::SkmError::Unknown(format!("Failed to copy to clipboard: {}", e))
+            })?;
+
+            println!("✓ Public key '{}' copied to clipboard!", name);
+            println!(
+                "  Fingerprint: {}",
+                key.fingerprint.as_deref().unwrap_or("N/A")
+            );
+            if full {
+                println!("  (Full key with comment)");
+            } else {
+                println!("  (Key only, without comment)");
+            }
         }
 
         Ok(())

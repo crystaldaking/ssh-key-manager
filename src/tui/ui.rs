@@ -293,7 +293,7 @@ fn draw_delete_confirm(f: &mut Frame, app: &App, area: Rect) {
 fn draw_footer(f: &mut Frame, app: &App, area: Rect) {
     let help_text = match app.state {
         AppState::KeyList => {
-            "j/k or ↑/↓: Navigate | Enter: Details | n: New | e: Export | i: Import | d: Delete | r: Refresh | q: Quit"
+            "j/k: Navigate | Enter: Details | y: Copy Key | c: Copy Full | n: New | e: Export | i: Import | d: Delete | q: Quit"
         }
         AppState::KeyDetail => "ESC: Back | c: Edit Comment",
         AppState::CreateWizard => "ESC: Cancel | Enter: Continue",
@@ -323,6 +323,8 @@ fn draw_help_popup(f: &mut Frame) {
                   Enter - Select/Confirm\n\
                   ESC - Cancel/Back\n\n\
                   Key List:\n\
+                  y - Copy public key (without comment)\n\
+                  c - Copy full public key (with comment)\n\
                   n - Create new key\n\
                   e - Export keys\n\
                   i - Import keys\n\

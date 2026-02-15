@@ -98,6 +98,42 @@ fn handle_key_list(app: &mut App, key: KeyEvent) -> Result<bool> {
             }
             Ok(true)
         }
+        KeyCode::Char('y') => {
+            // Copy public key to clipboard
+            if let Some(key) = app.get_selected_key() {
+                match copy_key_to_clipboard(key, false) {
+                    Ok(()) => app.set_message(
+                        format!("Public key '{}' copied to clipboard!", key.name),
+                        MessageType::Success,
+                        AppState::KeyList,
+                    ),
+                    Err(e) => app.set_message(
+                        format!("Failed to copy: {}", e),
+                        MessageType::Error,
+                        AppState::KeyList,
+                    ),
+                }
+            }
+            Ok(true)
+        }
+        KeyCode::Char('c') => {
+            // Copy full public key with comment
+            if let Some(key) = app.get_selected_key() {
+                match copy_key_to_clipboard(key, true) {
+                    Ok(()) => app.set_message(
+                        format!("Full public key '{}' copied to clipboard!", key.name),
+                        MessageType::Success,
+                        AppState::KeyList,
+                    ),
+                    Err(e) => app.set_message(
+                        format!("Failed to copy: {}", e),
+                        MessageType::Error,
+                        AppState::KeyList,
+                    ),
+                }
+            }
+            Ok(true)
+        }
         _ => Ok(true),
     }
 }
@@ -403,4 +439,38 @@ fn handle_message_dialog(app: &mut App, key: KeyEvent) -> Result<bool> {
         }
         _ => Ok(true),
     }
+}
+
+/// Copy public key to clipboard
+fn copy_key_to_clipboard(key: &crate::ssh::keys::SshKey, full: bool) -> Result<()> {
+    use arboard::Clipboard;
+
+    let content = if full {
+        key.read_public_content()?.ok_or_else(|| {
+            crate::error::SkmError::KeyNotFound(format!("Public key for {}", key.name))
+        })?
+    } else {
+        // Extract just the key part (without comment)
+        let full_content = key.read_public_content()?.ok_or_else(|| {
+            crate::error::SkmError::KeyNotFound(format!("Public key for {}", key.name))
+        })?;
+
+        // Parse "type key_base64 comment" -> "type key_base64"
+        let parts: Vec<&str> = full_content.trim().split_whitespace().collect();
+        if parts.len() >= 2 {
+            format!("{} {}", parts[0], parts[1])
+        } else {
+            full_content
+        }
+    };
+
+    let mut clipboard = Clipboard::new().map_err(|e| {
+        crate::error::SkmError::Unknown(format!("Failed to access clipboard: {}", e))
+    })?;
+
+    clipboard.set_text(content.trim()).map_err(|e| {
+        crate::error::SkmError::Unknown(format!("Failed to copy to clipboard: {}", e))
+    })?;
+
+    Ok(())
 }

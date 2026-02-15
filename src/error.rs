@@ -23,6 +23,9 @@ pub enum SkmError {
     #[error("Invalid key format: {0}")]
     InvalidKeyFormat(String),
 
+    #[error("Serialization error: {0}")]
+    Serialization(#[from] serde_json::Error),
+
     #[error("Import/Export error: {0}")]
     ImportExport(String),
 

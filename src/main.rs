@@ -9,24 +9,11 @@ use std::io;
 use tracing::{error, info};
 
 use ssh_key_manager::{
+    cli::{Cli, CliExecutor},
     config::Config,
     tui::{app::App, events::handle_events, ui::draw},
     Result,
 };
-
-#[derive(Parser, Debug)]
-#[command(name = "skm")]
-#[command(about = "SSH Key Manager - TUI application for managing SSH keys")]
-#[command(version)]
-struct Cli {
-    /// Path to SSH directory (default: ~/.ssh)
-    #[arg(short, long)]
-    ssh_dir: Option<std::path::PathBuf>,
-
-    /// Enable debug logging
-    #[arg(short, long)]
-    debug: bool,
-}
 
 fn main() -> Result<()> {
     let cli = Cli::parse();
@@ -34,10 +21,8 @@ fn main() -> Result<()> {
     // Setup logging
     setup_logging(cli.debug)?;
 
-    info!("Starting SSH Key Manager");
-
     // Load configuration
-    let config = if let Some(ssh_dir) = cli.ssh_dir {
+    let config = if let Some(ref ssh_dir) = cli.ssh_dir {
         Config::from_ssh_dir(ssh_dir)?
     } else {
         Config::new()
@@ -46,6 +31,31 @@ fn main() -> Result<()> {
     // Ensure SSH directory exists
     config.ensure_ssh_dir()?;
 
+    // Check if CLI command is provided
+    if let Some(command) = cli.command {
+        // CLI mode
+        info!("Running in CLI mode");
+        let executor = CliExecutor::new(config);
+        
+        match executor.execute(command) {
+            Ok(()) => {
+                info!("CLI command completed successfully");
+                Ok(())
+            }
+            Err(e) => {
+                error!("CLI command failed: {}", e);
+                eprintln!("Error: {}", e);
+                std::process::exit(1);
+            }
+        }
+    } else {
+        // TUI mode (default)
+        info!("Starting SSH Key Manager in TUI mode");
+        run_tui(config)
+    }
+}
+
+fn run_tui(config: Config) -> Result<()> {
     // Setup terminal
     enable_raw_mode()?;
     let mut stdout = io::stdout();

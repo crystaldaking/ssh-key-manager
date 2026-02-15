@@ -2,7 +2,7 @@
 
 TUI/CLI application for managing SSH keys on macOS, Linux, and Windows (including WSL).
 
-[![CI](https://github.com/crystaldaking/ssh-key-manager/workflows/CI/badge.svg)](https://github.com/crystaldaking/ssh-key-manager/actions)
+[![CI](https://github.com/crystaldaking/ssh-key-manager/actions/workflows/ci.yml/badge.svg)](https://github.com/crystaldaking/ssh-key-manager/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 ## Features

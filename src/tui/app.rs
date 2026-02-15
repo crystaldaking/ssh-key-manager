@@ -285,7 +285,7 @@ mod tests {
         // Enter filename
         app.wizard_input = "test_key".to_string();
         assert!(app.wizard_next());
-        assert_eq!(app.get_wizard_step(), Some(WizardStep::EnterComment));
+        assert_eq!(app.get_wizard_step(), Some(WizardStep::EnterPassphrase));
         
         app.end_wizard();
         assert!(app.wizard.is_none());

@@ -154,14 +154,15 @@ mod tests {
         
         let opts = KeyGenOptions {
             key_type: KeyType::Ed25519,
-            filename: "test_key".to_string(),
+            filename: "id_ed25519".to_string(),
             comment: "test@example.com".to_string(),
             passphrase: None,
+            bits: None,
         };
 
         let key = generator.generate(opts).unwrap();
         
-        assert_eq!(key.name, "test_key");
+        assert_eq!(key.name, "id_ed25519");
         assert_eq!(key.key_type, KeyType::Ed25519);
         assert!(key.path.exists());
         assert!(key.public_path.exists());

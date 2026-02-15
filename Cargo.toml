@@ -59,13 +59,13 @@ clap = { version = "4.5", features = ["derive"] }
 
 # Utilities
 chrono = { version = "0.4", features = ["serde"] }
-uuid = { version = "1.13", features = ["v4", "serde"] }
+uuid = { version = "1.12", features = ["v4", "serde"] }
 walkdir = "2.5"
 zeroize = "1.8"
 hostname = "0.4"
 
 [dev-dependencies]
-tempfile = "3.16"
+tempfile = "3.15"
 pretty_assertions = "1.4"
 mockall = "0.13"
 

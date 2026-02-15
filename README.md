@@ -15,23 +15,6 @@ TUI/CLI application for managing SSH keys on macOS, Linux, and Windows (includin
 
 ## Installation
 
-### Snap (Ubuntu/Linux) - Recommended
-
-[![Get it from the Snap Store](https://snapcraft.io/static/images/badges/en/snap-store-white.svg)](https://snapcraft.io/ssh-key-manager)
-
-```bash
-# Install from Snap Store
-sudo snap install ssh-key-manager
-
-# Or install with classic confinement for full SSH access
-sudo snap install ssh-key-manager --classic
-```
-
-After installation, connect the SSH keys interface:
-```bash
-sudo snap connect ssh-key-manager:ssh-keys
-```
-
 ### Quick Install (Linux/macOS)
 
 ```bash
@@ -313,22 +296,6 @@ crontab -e
 ### Prerequisites
 - Rust 1.85 or later
 - Cargo
-
-### Building Snap Package
-
-```bash
-# Install snapcraft
-sudo snap install snapcraft --classic
-
-# Build snap locally
-snapcraft
-
-# Install locally built snap
-sudo snap install --dangerous *.snap
-
-# Connect SSH keys interface
-sudo snap connect ssh-key-manager:ssh-keys
-```
 
 ### Build Commands
 ```bash

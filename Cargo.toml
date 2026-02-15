@@ -1,0 +1,71 @@
+[package]
+name = "ssh-key-manager"
+version = "0.1.0"
+edition = "2024"
+authors = ["Developer <dev@example.com>"]
+description = "TUI application for managing SSH keys"
+license = "MIT"
+repository = "https://github.com/example/ssh-key-manager"
+keywords = ["ssh", "key", "manager", "tui", "cli"]
+categories = ["command-line-utilities", "development-tools"]
+rust-version = "1.85"
+
+[[bin]]
+name = "skm"
+path = "src/main.rs"
+
+[dependencies]
+# TUI Framework - latest stable
+ratatui = "0.29"
+crossterm = "0.28"
+
+# SSH Keys handling
+ssh-key = { version = "0.6", features = ["ed25519", "rsa", "serde", "alloc"] }
+rand = "0.8"
+
+# Encryption (age) - modern encryption
+age = { version = "0.11", features = ["armor"] }
+secrecy = "0.10"
+
+# Serialization
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+
+# Error handling
+thiserror = "2.0"
+anyhow = "1.0"
+
+# System paths
+directories = "6.0"
+
+# Async runtime
+tokio = { version = "1.43", features = ["rt-multi-thread", "macros"] }
+
+# Logging
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+
+# CLI
+clap = { version = "4.5", features = ["derive"] }
+
+# Utilities
+chrono = { version = "0.4", features = ["serde"] }
+uuid = { version = "1.13", features = ["v4", "serde"] }
+walkdir = "2.5"
+zeroize = "1.8"
+hostname = "0.4"
+
+[dev-dependencies]
+tempfile = "3.16"
+pretty_assertions = "1.4"
+mockall = "0.13"
+
+[profile.release]
+opt-level = 3
+lto = true
+strip = true
+codegen-units = 1
+
+[profile.dev]
+opt-level = 0
+debug = true

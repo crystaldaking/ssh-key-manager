@@ -4,7 +4,11 @@ use tempfile::TempDir;
 use ssh_key_manager::{
     config::Config,
     crypto::backup::{BackupManager, ExportOptions, ImportOptions, MergeStrategy},
-    ssh::{generate::{KeyGenOptions, KeyGenerator}, keys::KeyType, KeyScanner},
+    ssh::{
+        KeyScanner,
+        generate::{KeyGenOptions, KeyGenerator},
+        keys::KeyType,
+    },
 };
 
 #[test]
@@ -39,7 +43,7 @@ fn test_export_import_roundtrip() {
     let temp_dir = TempDir::new().unwrap();
     let export_dir = TempDir::new().unwrap();
     let config = Config::from_ssh_dir(temp_dir.path()).unwrap();
-    
+
     // Create test key
     let generator = KeyGenerator::new(&config.ssh_dir);
     let opts = KeyGenOptions {
@@ -50,14 +54,14 @@ fn test_export_import_roundtrip() {
         bits: None,
     };
     generator.generate(opts).unwrap();
-    
+
     let scanner = KeyScanner::new(&config.ssh_dir);
     let keys = scanner.scan().unwrap();
-    
+
     // Export
     let manager = BackupManager::new(&config.ssh_dir);
     let backup_path = export_dir.path().join("backup.skm");
-    
+
     let export_opts = ExportOptions {
         description: Some("Test backup".to_string()),
         include_public_only: false,
@@ -67,23 +71,23 @@ fn test_export_import_roundtrip() {
     manager
         .export(&keys, &backup_path, "test_passphrase", export_opts)
         .unwrap();
-    
+
     assert!(backup_path.exists());
-    
+
     // Import to new location
     let import_dir = TempDir::new().unwrap();
     let import_config = Config::from_ssh_dir(import_dir.path()).unwrap();
     let import_manager = BackupManager::new(&import_config.ssh_dir);
-    
+
     let import_opts = ImportOptions {
         merge_strategy: MergeStrategy::SkipExisting,
         dry_run: false,
     };
-    
+
     let report = import_manager
         .import(&backup_path, "test_passphrase", import_opts)
         .unwrap();
-    
+
     assert_eq!(report.imported.len(), 1);
     assert!(import_dir.path().join("backup_test").exists());
 }
@@ -115,7 +119,7 @@ fn test_generate_multiple_key_types() {
 fn test_import_wrong_passphrase() {
     let temp_dir = TempDir::new().unwrap();
     let config = Config::from_ssh_dir(temp_dir.path()).unwrap();
-    
+
     // Create a key
     let generator = KeyGenerator::new(&config.ssh_dir);
     let opts = KeyGenOptions {
@@ -126,17 +130,17 @@ fn test_import_wrong_passphrase() {
         bits: None,
     };
     generator.generate(opts).unwrap();
-    
+
     let scanner = KeyScanner::new(&config.ssh_dir);
     let keys = scanner.scan().unwrap();
-    
+
     // Export
     let backup_path = temp_dir.path().join("pass.skm");
     let manager = BackupManager::new(&config.ssh_dir);
     manager
         .export(&keys, &backup_path, "correct", ExportOptions::default())
         .unwrap();
-    
+
     // Try import with wrong passphrase
     let import_opts = ImportOptions::default();
     let result = manager.import(&backup_path, "wrong", import_opts);

@@ -46,7 +46,7 @@ impl KeyGenerator {
 
         if private_path.exists() {
             return Err(SkmError::KeyAlreadyExists(
-                private_path.to_string_lossy().to_string()
+                private_path.to_string_lossy().to_string(),
             ));
         }
 
@@ -54,19 +54,23 @@ impl KeyGenerator {
             KeyType::Ed25519 => self.generate_ed25519()?,
             KeyType::Rsa => {
                 return Err(SkmError::SshKey(
-                    "RSA generation not yet implemented".to_string()
+                    "RSA generation not yet implemented".to_string(),
                 ));
             }
-            _ => return Err(SkmError::SshKey(
-                format!("Key type {} not yet supported for generation", options.key_type)
-            )),
+            _ => {
+                return Err(SkmError::SshKey(format!(
+                    "Key type {} not yet supported for generation",
+                    options.key_type
+                )));
+            }
         };
 
         // Write private key
         self.write_private_key(&private_path, &private_key, options.passphrase.as_deref())?;
 
         // Write public key
-        let public_key_openssh = public_key.to_openssh()
+        let public_key_openssh = public_key
+            .to_openssh()
             .map_err(|e| SkmError::SshKey(e.to_string()))?;
         let public_content = format!("{} {}", public_key.algorithm(), public_key_openssh);
         self.write_public_key(&public_path, &public_content, &options.comment)?;
@@ -87,7 +91,8 @@ impl KeyGenerator {
         key: &PrivateKey,
         _passphrase: Option<&str>,
     ) -> Result<()> {
-        let pem = key.to_openssh(ssh_key::LineEnding::default())
+        let pem = key
+            .to_openssh(ssh_key::LineEnding::default())
             .map_err(|e| SkmError::SshKey(e.to_string()))?;
 
         let mut file = OpenOptions::new()
@@ -98,15 +103,14 @@ impl KeyGenerator {
             .open(path)
             .map_err(SkmError::Io)?;
 
-        file.write_all(pem.as_bytes())
-            .map_err(SkmError::Io)?;
+        file.write_all(pem.as_bytes()).map_err(SkmError::Io)?;
 
         Ok(())
     }
 
     fn write_public_key(&self, path: &Path, key_data: &str, comment: &str) -> Result<()> {
         let content = format!("{} {}", key_data, comment);
-        
+
         let mut file = OpenOptions::new()
             .write(true)
             .create(true)
@@ -115,8 +119,7 @@ impl KeyGenerator {
             .open(path)
             .map_err(SkmError::Io)?;
 
-        file.write_all(content.as_bytes())
-            .map_err(SkmError::Io)?;
+        file.write_all(content.as_bytes()).map_err(SkmError::Io)?;
 
         Ok(())
     }
@@ -151,7 +154,7 @@ mod tests {
     fn test_generate_ed25519() {
         let temp_dir = TempDir::new().unwrap();
         let generator = KeyGenerator::new(temp_dir.path());
-        
+
         let opts = KeyGenOptions {
             key_type: KeyType::Ed25519,
             filename: "id_ed25519".to_string(),
@@ -161,7 +164,7 @@ mod tests {
         };
 
         let key = generator.generate(opts).unwrap();
-        
+
         assert_eq!(key.name, "id_ed25519");
         assert_eq!(key.key_type, KeyType::Ed25519);
         assert!(key.path.exists());
@@ -172,14 +175,14 @@ mod tests {
     fn test_generate_duplicate_key_fails() {
         let temp_dir = TempDir::new().unwrap();
         let generator = KeyGenerator::new(temp_dir.path());
-        
+
         let opts = KeyGenOptions {
             filename: "test_key".to_string(),
             ..Default::default()
         };
 
         generator.generate(opts.clone()).unwrap();
-        
+
         let result = generator.generate(opts);
         assert!(matches!(result, Err(SkmError::KeyAlreadyExists(_))));
     }

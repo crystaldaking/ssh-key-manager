@@ -32,12 +32,12 @@ pub struct App {
     pub selected_key: Option<SshKey>,
     pub message: Option<(String, MessageType, AppState)>, // (message, type, return_state)
     pub show_help: bool,
-    
+
     // Wizard state
     pub wizard: Option<CreateWizard>,
     pub wizard_input: String,
     pub wizard_confirm_passphrase: String,
-    
+
     // Dialog states
     pub export_path: String,
     pub import_path: String,
@@ -80,12 +80,12 @@ impl App {
     pub fn refresh_keys(&mut self) -> Result<()> {
         let scanner = KeyScanner::new(&self.config.ssh_dir);
         self.keys = scanner.scan()?;
-        
+
         // Adjust selected index if out of bounds
         if !self.keys.is_empty() && self.selected_index >= self.keys.len() {
             self.selected_index = self.keys.len() - 1;
         }
-        
+
         Ok(())
     }
 
@@ -115,7 +115,12 @@ impl App {
         }
     }
 
-    pub fn set_message(&mut self, text: impl Into<String>, msg_type: MessageType, return_state: AppState) {
+    pub fn set_message(
+        &mut self,
+        text: impl Into<String>,
+        msg_type: MessageType,
+        return_state: AppState,
+    ) {
         self.message = Some((text.into(), msg_type, return_state));
         self.state = AppState::MessageDialog;
     }
@@ -133,7 +138,9 @@ impl App {
 
     pub fn get_default_export_path(&self) -> PathBuf {
         let timestamp = chrono::Local::now().format("%Y%m%d_%H%M%S");
-        self.config.export_dir.join(format!("ssh_backup_{}.skm", timestamp))
+        self.config
+            .export_dir
+            .join(format!("ssh_backup_{}.skm", timestamp))
     }
 
     // Wizard methods
@@ -177,9 +184,7 @@ impl App {
                         false
                     }
                 }
-                WizardStep::Confirm => {
-                    true
-                }
+                WizardStep::Confirm => true,
             }
         } else {
             false
@@ -257,10 +262,10 @@ mod tests {
         let temp_dir = TempDir::new().unwrap();
         std::fs::write(temp_dir.path().join("key1"), "test").unwrap();
         std::fs::write(temp_dir.path().join("key2"), "test").unwrap();
-        
+
         let config = Config::from_ssh_dir(temp_dir.path()).unwrap();
         let mut app = App::new(config).unwrap();
-        
+
         assert_eq!(app.selected_index, 0);
         app.next_key();
         assert_eq!(app.selected_index, 1);
@@ -274,19 +279,19 @@ mod tests {
     fn test_wizard_flow() {
         let config = create_test_config();
         let mut app = App::new(config).unwrap();
-        
+
         app.start_wizard();
         assert!(app.wizard.is_some());
-        
+
         // Select type
         app.wizard_select_type(crate::ssh::keys::KeyType::Ed25519);
         assert_eq!(app.get_wizard_step(), Some(WizardStep::EnterFilename));
-        
+
         // Enter filename
         app.wizard_input = "test_key".to_string();
         assert!(app.wizard_next());
         assert_eq!(app.get_wizard_step(), Some(WizardStep::EnterPassphrase));
-        
+
         app.end_wizard();
         assert!(app.wizard.is_none());
     }

@@ -30,15 +30,12 @@ impl KeyScanner {
             .filter_map(|e| e.ok())
         {
             let path = entry.path();
-            
+
             if path.is_dir() {
                 continue;
             }
 
-            let file_name = path
-                .file_name()
-                .and_then(|n| n.to_str())
-                .unwrap_or("");
+            let file_name = path.file_name().and_then(|n| n.to_str()).unwrap_or("");
 
             // Skip public key files (we'll pair them with private keys)
             if file_name.ends_with(".pub") {
@@ -115,7 +112,7 @@ mod tests {
     #[test]
     fn test_scan_with_keys() {
         let temp_dir = TempDir::new().unwrap();
-        
+
         // Create test keys
         std::fs::write(temp_dir.path().join("id_rsa"), "private").unwrap();
         std::fs::write(temp_dir.path().join("id_rsa.pub"), "public").unwrap();
@@ -124,21 +121,21 @@ mod tests {
 
         let scanner = KeyScanner::new(temp_dir.path());
         let keys = scanner.scan().unwrap();
-        
+
         assert_eq!(keys.len(), 2);
     }
 
     #[test]
     fn test_skip_non_key_files() {
         let temp_dir = TempDir::new().unwrap();
-        
+
         std::fs::write(temp_dir.path().join("id_rsa"), "private").unwrap();
         std::fs::write(temp_dir.path().join("known_hosts"), "hosts").unwrap();
         std::fs::write(temp_dir.path().join("config"), "config").unwrap();
 
         let scanner = KeyScanner::new(temp_dir.path());
         let keys = scanner.scan().unwrap();
-        
+
         assert_eq!(keys.len(), 1);
         assert_eq!(keys[0].name, "id_rsa");
     }
@@ -150,7 +147,7 @@ mod tests {
 
         let scanner = KeyScanner::new(temp_dir.path());
         let key = scanner.find_key_by_name("my_key").unwrap();
-        
+
         assert!(key.is_some());
         assert_eq!(key.unwrap().name, "my_key");
     }

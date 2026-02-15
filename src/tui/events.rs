@@ -5,8 +5,8 @@ use crate::error::Result;
 use crate::ssh::generate::KeyGenerator;
 use crate::ssh::keys::KeyType;
 
-use crate::tui::app::{App, AppState, DialogState, MessageType};
 use crate::crypto::backup::{BackupManager, ExportOptions, ImportOptions, MergeStrategy};
+use crate::tui::app::{App, AppState, DialogState, MessageType};
 
 pub fn handle_events(app: &mut App) -> Result<bool> {
     if event::poll(Duration::from_millis(50))? {
@@ -87,8 +87,14 @@ fn handle_key_list(app: &mut App, key: KeyEvent) -> Result<bool> {
         }
         KeyCode::Char('r') => {
             match app.refresh_keys() {
-                Ok(()) => app.set_message("Keys refreshed", MessageType::Success, AppState::KeyList),
-                Err(e) => app.set_message(format!("Error: {}", e), MessageType::Error, AppState::KeyList),
+                Ok(()) => {
+                    app.set_message("Keys refreshed", MessageType::Success, AppState::KeyList)
+                }
+                Err(e) => app.set_message(
+                    format!("Error: {}", e),
+                    MessageType::Error,
+                    AppState::KeyList,
+                ),
             }
             Ok(true)
         }
@@ -155,10 +161,18 @@ fn handle_create_wizard(app: &mut App, key: KeyEvent) -> Result<bool> {
                             Ok(_) => {
                                 app.refresh_keys()?;
                                 app.end_wizard();
-                                app.set_message("Key created successfully", MessageType::Success, AppState::KeyList);
+                                app.set_message(
+                                    "Key created successfully",
+                                    MessageType::Success,
+                                    AppState::KeyList,
+                                );
                             }
                             Err(e) => {
-                                app.set_message(format!("Failed to create key: {}", e), MessageType::Error, AppState::CreateWizard);
+                                app.set_message(
+                                    format!("Failed to create key: {}", e),
+                                    MessageType::Error,
+                                    AppState::CreateWizard,
+                                );
                             }
                         }
                     }
@@ -169,13 +183,11 @@ fn handle_create_wizard(app: &mut App, key: KeyEvent) -> Result<bool> {
         KeyCode::Char(c) => {
             app.clear_wizard_error();
             match current_step {
-                WizardStep::SelectType => {
-                    match c {
-                        '1' => app.wizard_select_type(KeyType::Ed25519),
-                        '2' => app.wizard_select_type(KeyType::Rsa),
-                        _ => {}
-                    }
-                }
+                WizardStep::SelectType => match c {
+                    '1' => app.wizard_select_type(KeyType::Ed25519),
+                    '2' => app.wizard_select_type(KeyType::Rsa),
+                    _ => {}
+                },
                 WizardStep::EnterPassphrase if c == '\t' => {
                     // Tab to switch between passphrase and confirm
                 }
@@ -209,28 +221,35 @@ fn handle_export_dialog(app: &mut App, key: KeyEvent) -> Result<bool> {
                     // Perform export
                     let manager = BackupManager::new(&app.config.ssh_dir);
                     let opts = ExportOptions {
-                        description: Some(format!("Backup from {}", chrono::Local::now().format("%Y-%m-%d"))),
+                        description: Some(format!(
+                            "Backup from {}",
+                            chrono::Local::now().format("%Y-%m-%d")
+                        )),
                         include_public_only: false,
                         selected_keys: None,
                     };
-                    
+
                     let path = std::path::PathBuf::from(&app.export_path);
-                    
+
                     // Ensure parent directory exists
                     if let Some(parent) = path.parent() {
                         std::fs::create_dir_all(parent).ok();
                     }
-                    
+
                     match manager.export(&app.keys, &path, &app.dialog_passphrase, opts) {
                         Ok(()) => {
                             app.set_message(
                                 format!("Exported {} keys to {}", app.keys.len(), app.export_path),
                                 MessageType::Success,
-                                AppState::KeyList
+                                AppState::KeyList,
                             );
                         }
                         Err(e) => {
-                            app.set_message(format!("Export failed: {}", e), MessageType::Error, AppState::KeyList);
+                            app.set_message(
+                                format!("Export failed: {}", e),
+                                MessageType::Error,
+                                AppState::KeyList,
+                            );
                         }
                     }
                     Ok(true)
@@ -288,9 +307,9 @@ fn handle_import_dialog(app: &mut App, key: KeyEvent) -> Result<bool> {
                         merge_strategy: MergeStrategy::SkipExisting,
                         dry_run: false,
                     };
-                    
+
                     let path = std::path::PathBuf::from(&app.import_path);
-                    
+
                     match manager.import(&path, &app.dialog_passphrase, opts) {
                         Ok(report) => {
                             app.refresh_keys()?;
@@ -303,7 +322,11 @@ fn handle_import_dialog(app: &mut App, key: KeyEvent) -> Result<bool> {
                             app.set_message(msg, MessageType::Success, AppState::KeyList);
                         }
                         Err(e) => {
-                            app.set_message(format!("Import failed: {}", e), MessageType::Error, AppState::KeyList);
+                            app.set_message(
+                                format!("Import failed: {}", e),
+                                MessageType::Error,
+                                AppState::KeyList,
+                            );
                         }
                     }
                     Ok(true)
@@ -349,12 +372,20 @@ fn handle_delete_confirm(app: &mut App, key: KeyEvent) -> Result<bool> {
             if let Some(key) = app.get_selected_key().cloned() {
                 let private_deleted = std::fs::remove_file(&key.path).is_ok();
                 let public_deleted = std::fs::remove_file(&key.public_path).is_ok();
-                
+
                 if private_deleted || public_deleted {
                     app.refresh_keys()?;
-                    app.set_message(format!("Deleted key '{}'", key.name), MessageType::Success, AppState::KeyList);
+                    app.set_message(
+                        format!("Deleted key '{}'", key.name),
+                        MessageType::Success,
+                        AppState::KeyList,
+                    );
                 } else {
-                    app.set_message(format!("Failed to delete key '{}'", key.name), MessageType::Error, AppState::KeyList);
+                    app.set_message(
+                        format!("Failed to delete key '{}'", key.name),
+                        MessageType::Error,
+                        AppState::KeyList,
+                    );
                 }
             }
             app.confirm_delete = false;

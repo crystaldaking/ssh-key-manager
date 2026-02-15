@@ -2,6 +2,9 @@
 
 TUI/CLI application for managing SSH keys on macOS, Linux, and Windows (including WSL).
 
+[![CI](https://github.com/YOUR_USERNAME/ssh-key-manager/workflows/CI/badge.svg)](https://github.com/YOUR_USERNAME/ssh-key-manager/actions)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
 ## Features
 
 - **Key Management**: List, view, create, edit, and delete SSH keys
@@ -12,15 +15,60 @@ TUI/CLI application for managing SSH keys on macOS, Linux, and Windows (includin
 
 ## Installation
 
-### From Source
+### Quick Install (Linux/macOS)
 
 ```bash
-git clone https://github.com/example/ssh-key-manager
-cd ssh-key-manager
-cargo build --release
+curl -sSL https://raw.githubusercontent.com/YOUR_USERNAME/ssh-key-manager/main/install.sh | bash
 ```
 
-The binary will be available at `target/release/skm`.
+Or with custom install directory:
+```bash
+curl -sSL https://raw.githubusercontent.com/YOUR_USERNAME/ssh-key-manager/main/install.sh | bash -s ~/.local/bin
+```
+
+### Manual Installation
+
+Download the latest binary from [GitHub Releases](https://github.com/YOUR_USERNAME/ssh-key-manager/releases):
+
+**Linux:**
+```bash
+curl -LO https://github.com/YOUR_USERNAME/ssh-key-manager/releases/latest/download/skm-linux-amd64
+chmod +x skm-linux-amd64
+sudo mv skm-linux-amd64 /usr/local/bin/skm
+```
+
+**macOS (Intel):**
+```bash
+curl -LO https://github.com/YOUR_USERNAME/ssh-key-manager/releases/latest/download/skm-macos-amd64
+chmod +x skm-macos-amd64
+sudo mv skm-macos-amd64 /usr/local/bin/skm
+```
+
+**macOS (Apple Silicon):**
+```bash
+curl -LO https://github.com/YOUR_USERNAME/ssh-key-manager/releases/latest/download/skm-macos-arm64
+chmod +x skm-macos-arm64
+sudo mv skm-macos-arm64 /usr/local/bin/skm
+```
+
+**Windows:**
+Download `skm-windows-amd64.exe` from [Releases](https://github.com/YOUR_USERNAME/ssh-key-manager/releases) and rename to `skm.exe`.
+
+### From Source
+
+Requires Rust 1.85+:
+
+```bash
+git clone https://github.com/YOUR_USERNAME/ssh-key-manager
+cd ssh-key-manager
+cargo build --release
+# Binary will be at target/release/skm
+```
+
+Or using Make:
+```bash
+make install
+```
 
 ## Usage
 
@@ -243,6 +291,35 @@ crontab -e
 - For cron jobs, consider using a passphrase file with restricted permissions (600)
 - Exported backups (.skm files) contain both private and public keys - keep them secure
 
+## Building from Source
+
+### Prerequisites
+- Rust 1.85 or later
+- Cargo
+
+### Build Commands
+```bash
+# Clone repository
+git clone https://github.com/YOUR_USERNAME/ssh-key-manager
+cd ssh-key-manager
+
+# Build debug version
+make build
+
+# Build release version
+make release
+
+# Run tests
+make test
+
+# Install locally
+make install
+```
+
+## Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
+
 ## License
 
-MIT
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.

@@ -61,9 +61,9 @@ pub struct ImportOptions {
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum MergeStrategy {
-    SkipExisting,    // Skip keys that already exist
-    Overwrite,       // Overwrite existing keys
-    Rename,          // Rename with timestamp suffix
+    SkipExisting, // Skip keys that already exist
+    Overwrite,    // Overwrite existing keys
+    Rename,       // Rename with timestamp suffix
 }
 
 impl Default for ImportOptions {
@@ -132,17 +132,15 @@ impl BackupManager {
         };
 
         // Serialize to JSON
-        let json = serde_json::to_vec(&backup)
-            .map_err(|e| SkmError::ImportExport(e.to_string()))?;
+        let json =
+            serde_json::to_vec(&backup).map_err(|e| SkmError::ImportExport(e.to_string()))?;
 
         // Encrypt
         let encrypted = EncryptionManager::encrypt_with_passphrase(&json, passphrase)?;
 
         // Write to file
-        let mut file = fs::File::create(output_path)
-            .map_err(SkmError::Io)?;
-        file.write_all(&encrypted)
-            .map_err(SkmError::Io)?;
+        let mut file = fs::File::create(output_path).map_err(SkmError::Io)?;
+        file.write_all(&encrypted).map_err(SkmError::Io)?;
 
         Ok(())
     }
@@ -155,8 +153,7 @@ impl BackupManager {
         options: ImportOptions,
     ) -> Result<ImportReport> {
         // Read encrypted file
-        let encrypted = fs::read(backup_path)
-            .map_err(SkmError::Io)?;
+        let encrypted = fs::read(backup_path).map_err(SkmError::Io)?;
 
         // Decrypt
         let decrypted = EncryptionManager::decrypt_with_passphrase(&encrypted, passphrase)?;
@@ -180,10 +177,9 @@ impl BackupManager {
                     match options.merge_strategy {
                         MergeStrategy::SkipExisting => report.skipped.push(entry.name),
                         MergeStrategy::Overwrite => report.overwritten.push(entry.name),
-                        MergeStrategy::Rename => report.imported.push(format!(
-                            "{} -> {}_{{timestamp}}",
-                            entry.name, entry.name
-                        )),
+                        MergeStrategy::Rename => report
+                            .imported
+                            .push(format!("{} -> {}_{{timestamp}}", entry.name, entry.name)),
                     }
                 } else {
                     report.imported.push(entry.name);
@@ -205,11 +201,7 @@ impl BackupManager {
         Ok(report)
     }
 
-    fn import_entry(
-        &self,
-        entry: &BackupEntry,
-        strategy: MergeStrategy,
-    ) -> Result<ImportResult> {
+    fn import_entry(&self, entry: &BackupEntry, strategy: MergeStrategy) -> Result<ImportResult> {
         let private_path = self.ssh_dir.join(&entry.name);
         let public_path = private_path.with_extension("pub");
 
@@ -224,7 +216,8 @@ impl BackupManager {
                 MergeStrategy::Rename => {
                     let timestamp = chrono::Local::now().format("%Y%m%d_%H%M%S");
                     let new_name = format!("{}_{}", entry.name, timestamp);
-                    return self.write_key_files(&new_name, entry)
+                    return self
+                        .write_key_files(&new_name, entry)
                         .map(|_| ImportResult::Imported(new_name));
                 }
                 MergeStrategy::Overwrite => {
@@ -234,7 +227,7 @@ impl BackupManager {
         }
 
         self.write_key_files(&entry.name, entry)?;
-        
+
         if exists {
             Ok(ImportResult::Overwritten(entry.name.clone()))
         } else {
@@ -275,9 +268,7 @@ impl BackupManager {
 
     fn read_file_if_exists(&self, path: &Path) -> Result<Option<Vec<u8>>> {
         if path.exists() {
-            fs::read(path)
-                .map(Some)
-                .map_err(SkmError::Io)
+            fs::read(path).map(Some).map_err(SkmError::Io)
         } else {
             Ok(None)
         }
@@ -325,7 +316,7 @@ mod tests {
         let pub_path = temp_dir.path().join(format!("{}.pub", name));
         fs::write(&key_path, "private").unwrap();
         fs::write(&pub_path, "public").unwrap();
-        
+
         SshKey::from_path(&key_path).unwrap()
     }
 
@@ -333,33 +324,28 @@ mod tests {
     fn test_export_import_roundtrip() {
         let temp_dir = TempDir::new().unwrap();
         let export_dir = TempDir::new().unwrap();
-        
+
         // Create test key
         let key = create_test_key(&temp_dir, "test_key");
-        
+
         // Export
         let manager = BackupManager::new(temp_dir.path());
         let backup_path = export_dir.path().join("backup.skm");
-        
-        manager.export(
-            &[key],
-            &backup_path,
-            "test_pass",
-            ExportOptions::default(),
-        ).unwrap();
-        
+
+        manager
+            .export(&[key], &backup_path, "test_pass", ExportOptions::default())
+            .unwrap();
+
         assert!(backup_path.exists());
-        
+
         // Import to new location
         let import_dir = TempDir::new().unwrap();
         let import_manager = BackupManager::new(import_dir.path());
-        
-        let report = import_manager.import(
-            &backup_path,
-            "test_pass",
-            ImportOptions::default(),
-        ).unwrap();
-        
+
+        let report = import_manager
+            .import(&backup_path, "test_pass", ImportOptions::default())
+            .unwrap();
+
         assert_eq!(report.imported.len(), 1);
         assert!(import_dir.path().join("test_key").exists());
     }
@@ -368,12 +354,14 @@ mod tests {
     fn test_import_wrong_passphrase() {
         let temp_dir = TempDir::new().unwrap();
         let key = create_test_key(&temp_dir, "test_key");
-        
+
         let manager = BackupManager::new(temp_dir.path());
         let backup_path = temp_dir.path().join("backup.skm");
-        
-        manager.export(&[key], &backup_path, "correct", ExportOptions::default()).unwrap();
-        
+
+        manager
+            .export(&[key], &backup_path, "correct", ExportOptions::default())
+            .unwrap();
+
         let result = manager.import(&backup_path, "wrong", ImportOptions::default());
         assert!(result.is_err());
     }

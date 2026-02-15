@@ -32,7 +32,7 @@ impl Config {
 
     pub fn from_ssh_dir<P: AsRef<Path>>(path: P) -> Result<Self> {
         let ssh_dir = path.as_ref().to_path_buf();
-        
+
         if !ssh_dir.exists() {
             return Err(SkmError::Config(format!(
                 "SSH directory does not exist: {}",
@@ -52,9 +52,8 @@ impl Config {
 
     pub fn ensure_ssh_dir(&self) -> Result<()> {
         if !self.ssh_dir.exists() {
-            std::fs::create_dir_all(&self.ssh_dir)
-                .map_err(|e| SkmError::Io(e))?;
-            
+            std::fs::create_dir_all(&self.ssh_dir).map_err(|e| SkmError::Io(e))?;
+
             #[cfg(unix)]
             {
                 use std::os::unix::fs::PermissionsExt;

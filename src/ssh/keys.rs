@@ -102,12 +102,12 @@ impl SshKey {
 
         let status = Self::determine_status(path, &public_path);
         let metadata = std::fs::metadata(path).ok();
-        
+
         let created_at = metadata
             .as_ref()
             .and_then(|m| m.created().ok())
             .map(|t| t.into());
-        
+
         let modified_at = metadata
             .as_ref()
             .and_then(|m| m.modified().ok())
@@ -185,7 +185,7 @@ impl SshKey {
     pub fn update_comment(&mut self, new_comment: &str) -> Result<()> {
         if !self.public_path.exists() {
             return Err(SkmError::KeyNotFound(
-                self.public_path.to_string_lossy().to_string()
+                self.public_path.to_string_lossy().to_string(),
             ));
         }
 
@@ -199,7 +199,7 @@ impl SshKey {
             Ok(())
         } else {
             Err(SkmError::InvalidKeyFormat(
-                "Invalid public key format".to_string()
+                "Invalid public key format".to_string(),
             ))
         }
     }
@@ -241,10 +241,7 @@ mod tests {
     fn test_parse_public_key() {
         let temp_dir = TempDir::new().unwrap();
         let pub_path = temp_dir.path().join("test.pub");
-        std::fs::write(
-            &pub_path,
-            "ssh-rsa AAAAB3NzaC1 user@example.com"
-        ).unwrap();
+        std::fs::write(&pub_path, "ssh-rsa AAAAB3NzaC1 user@example.com").unwrap();
 
         let result = SshKey::parse_public_key(&pub_path).unwrap();
         assert!(result.0.is_some());

@@ -93,13 +93,12 @@ impl InputField {
             Style::default()
         };
 
-        Paragraph::new(display)
-            .block(
-                Block::default()
-                    .title(self.label.clone())
-                    .borders(Borders::ALL)
-                    .border_style(style),
-            )
+        Paragraph::new(display).block(
+            Block::default()
+                .title(self.label.clone())
+                .borders(Borders::ALL)
+                .border_style(style),
+        )
     }
 }
 
@@ -128,16 +127,16 @@ mod tests {
     #[test]
     fn test_input_field_cursor_movement() {
         let mut field = InputField::new("Test").with_value("abcde");
-        
+
         field.move_cursor_start();
         assert_eq!(field.cursor_position, 0);
-        
+
         field.move_cursor_end();
         assert_eq!(field.cursor_position, 5);
-        
+
         field.move_cursor_left();
         assert_eq!(field.cursor_position, 4);
-        
+
         field.move_cursor_right();
         assert_eq!(field.cursor_position, 5);
     }
@@ -147,7 +146,7 @@ mod tests {
         let field = InputField::new("Password")
             .with_password()
             .with_value("secret");
-        
+
         assert_eq!(field.display_value(), "••••••");
     }
 }

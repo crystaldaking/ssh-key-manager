@@ -11,12 +11,15 @@ impl EncryptionManager {
         let encryptor = age::Encryptor::with_user_passphrase(SecretString::from(passphrase));
 
         let mut encrypted = vec![];
-        let mut writer = encryptor.wrap_output(&mut encrypted)
+        let mut writer = encryptor
+            .wrap_output(&mut encrypted)
             .map_err(|e| SkmError::Encryption(e.to_string()))?;
-        
-        writer.write_all(data)
+
+        writer
+            .write_all(data)
             .map_err(|e| SkmError::Encryption(e.to_string()))?;
-        writer.finish()
+        writer
+            .finish()
             .map_err(|e| SkmError::Encryption(e.to_string()))?;
 
         Ok(encrypted)
@@ -24,19 +27,21 @@ impl EncryptionManager {
 
     /// Decrypt data with a passphrase
     pub fn decrypt_with_passphrase(encrypted: &[u8], passphrase: &str) -> Result<Vec<u8>> {
-        let decryptor = age::Decryptor::new(encrypted)
-            .map_err(|e| SkmError::Encryption(e.to_string()))?;
+        let decryptor =
+            age::Decryptor::new(encrypted).map_err(|e| SkmError::Encryption(e.to_string()))?;
 
         let mut decrypted = vec![];
-        
+
         // Create passphrase identity
         let identity = age::scrypt::Identity::new(SecretString::from(passphrase));
-        
+
         // Decrypt using the passphrase identity
-        let mut reader = decryptor.decrypt(std::iter::once(&identity as &dyn age::Identity))
+        let mut reader = decryptor
+            .decrypt(std::iter::once(&identity as &dyn age::Identity))
             .map_err(|_| SkmError::InvalidPassphrase)?;
-        
-        reader.read_to_end(&mut decrypted)
+
+        reader
+            .read_to_end(&mut decrypted)
             .map_err(|e| SkmError::Encryption(e.to_string()))?;
 
         Ok(decrypted)
@@ -45,20 +50,19 @@ impl EncryptionManager {
     /// Encrypt and encode to armor format (ASCII)
     pub fn encrypt_to_armor(data: &[u8], passphrase: &str) -> Result<String> {
         let encrypted = Self::encrypt_with_passphrase(data, passphrase)?;
-        let armor = age::armor::ArmoredWriter::wrap_output(
-            Vec::new(),
-            age::armor::Format::AsciiArmor,
-        )
-        .map_err(|e| SkmError::Encryption(e.to_string()))?;
-        
+        let armor =
+            age::armor::ArmoredWriter::wrap_output(Vec::new(), age::armor::Format::AsciiArmor)
+                .map_err(|e| SkmError::Encryption(e.to_string()))?;
+
         let mut armor_writer = armor;
-        armor_writer.write_all(&encrypted)
+        armor_writer
+            .write_all(&encrypted)
             .map_err(|e| SkmError::Encryption(e.to_string()))?;
-        let result = armor_writer.finish()
+        let result = armor_writer
+            .finish()
             .map_err(|e| SkmError::Encryption(e.to_string()))?;
-        
-        String::from_utf8(result)
-            .map_err(|e| SkmError::Encryption(format!("Invalid UTF-8: {}", e)))
+
+        String::from_utf8(result).map_err(|e| SkmError::Encryption(format!("Invalid UTF-8: {}", e)))
     }
 }
 

@@ -4,9 +4,9 @@ use crate::cli::{Commands, KeyTypeArg, OutputFormat};
 use crate::config::Config;
 use crate::crypto::backup::{BackupManager, ExportOptions, ImportOptions};
 use crate::error::Result;
+use crate::ssh::KeyScanner;
 use crate::ssh::generate::{KeyGenOptions, KeyGenerator};
 use crate::ssh::keys::KeyType;
-use crate::ssh::KeyScanner;
 
 pub struct CliExecutor {
     config: Config,
@@ -57,7 +57,10 @@ impl CliExecutor {
                 }
 
                 // Print header
-                println!("{:<20} {:<10} {:<20} {}", "Name", "Type", "Status", "Comment");
+                println!(
+                    "{:<20} {:<10} {:<20} {}",
+                    "Name", "Type", "Status", "Comment"
+                );
                 println!("{}", "-".repeat(70));
 
                 // Print keys
@@ -111,13 +114,19 @@ impl CliExecutor {
 
         // Handle passphrase from stdin if needed
         let passphrase = match passphrase.as_deref() {
-            Some("-") => read_passphrase_from_stdin("Enter passphrase (empty for no passphrase): ")?,
+            Some("-") => {
+                read_passphrase_from_stdin("Enter passphrase (empty for no passphrase): ")?
+            }
             Some(p) if !p.is_empty() => Some(p.to_string()),
             _ => None,
         };
 
         let key_type = key_type.to_key_type();
-        let bits = if key_type == KeyType::Rsa { Some(bits) } else { None };
+        let bits = if key_type == KeyType::Rsa {
+            Some(bits)
+        } else {
+            None
+        };
 
         let opts = KeyGenOptions {
             key_type,
@@ -152,17 +161,17 @@ impl CliExecutor {
         }
 
         // Handle passphrase
-        let passphrase = match passphrase.as_deref() {
-            Some("-") => read_passphrase_from_stdin("Enter encryption passphrase: ")?
-                .ok_or_else(|| {
-                    std::io::Error::new(std::io::ErrorKind::InvalidInput, "Passphrase required")
-                })?,
-            Some(p) => p.to_string(),
-            None => read_passphrase_from_stdin("Enter encryption passphrase: ")?
-                .ok_or_else(|| {
-                    std::io::Error::new(std::io::ErrorKind::InvalidInput, "Passphrase required")
-                })?,
-        };
+        let passphrase =
+            match passphrase.as_deref() {
+                Some("-") => read_passphrase_from_stdin("Enter encryption passphrase: ")?
+                    .ok_or_else(|| {
+                        std::io::Error::new(std::io::ErrorKind::InvalidInput, "Passphrase required")
+                    })?,
+                Some(p) => p.to_string(),
+                None => read_passphrase_from_stdin("Enter encryption passphrase: ")?.ok_or_else(
+                    || std::io::Error::new(std::io::ErrorKind::InvalidInput, "Passphrase required"),
+                )?,
+            };
 
         // Ensure parent directory exists
         if let Some(parent) = output.parent() {
@@ -199,17 +208,17 @@ impl CliExecutor {
         }
 
         // Handle passphrase
-        let passphrase = match passphrase.as_deref() {
-            Some("-") => read_passphrase_from_stdin("Enter decryption passphrase: ")?
-                .ok_or_else(|| {
-                    std::io::Error::new(std::io::ErrorKind::InvalidInput, "Passphrase required")
-                })?,
-            Some(p) => p.to_string(),
-            None => read_passphrase_from_stdin("Enter decryption passphrase: ")?
-                .ok_or_else(|| {
-                    std::io::Error::new(std::io::ErrorKind::InvalidInput, "Passphrase required")
-                })?,
-        };
+        let passphrase =
+            match passphrase.as_deref() {
+                Some("-") => read_passphrase_from_stdin("Enter decryption passphrase: ")?
+                    .ok_or_else(|| {
+                        std::io::Error::new(std::io::ErrorKind::InvalidInput, "Passphrase required")
+                    })?,
+                Some(p) => p.to_string(),
+                None => read_passphrase_from_stdin("Enter decryption passphrase: ")?.ok_or_else(
+                    || std::io::Error::new(std::io::ErrorKind::InvalidInput, "Passphrase required"),
+                )?,
+            };
 
         let manager = BackupManager::new(&self.config.ssh_dir);
         let opts = ImportOptions {
@@ -249,7 +258,7 @@ impl CliExecutor {
 
     fn cmd_delete(&self, name: String, force: bool) -> Result<()> {
         let scanner = KeyScanner::new(&self.config.ssh_dir);
-        
+
         let key = scanner
             .find_key_by_name(&name)?
             .ok_or_else(|| crate::error::SkmError::KeyNotFound(name.clone()))?;
@@ -257,10 +266,10 @@ impl CliExecutor {
         if !force {
             print!("Delete key '{}' and its public key? [y/N] ", name);
             io::stdout().flush()?;
-            
+
             let mut input = String::new();
             io::stdin().read_line(&mut input)?;
-            
+
             if !input.trim().eq_ignore_ascii_case("y") {
                 println!("Cancelled.");
                 return Ok(());
@@ -271,7 +280,7 @@ impl CliExecutor {
         if key.path.exists() {
             std::fs::remove_file(&key.path)?;
         }
-        
+
         // Delete public key if exists
         if key.public_path.exists() {
             std::fs::remove_file(&key.public_path)?;
@@ -283,7 +292,7 @@ impl CliExecutor {
 
     fn cmd_show(&self, name: String) -> Result<()> {
         let scanner = KeyScanner::new(&self.config.ssh_dir);
-        
+
         let key = scanner
             .find_key_by_name(&name)?
             .ok_or_else(|| crate::error::SkmError::KeyNotFound(name.clone()))?;
@@ -324,10 +333,10 @@ impl CliExecutor {
 fn read_passphrase_from_stdin(prompt: &str) -> io::Result<Option<String>> {
     print!("{}", prompt);
     io::stdout().flush()?;
-    
+
     let mut input = String::new();
     io::stdin().read_line(&mut input)?;
-    
+
     let input = input.trim().to_string();
     if input.is_empty() {
         Ok(None)

@@ -1,10 +1,8 @@
 use ratatui::{
+    Frame,
     layout::{Alignment, Constraint, Direction, Layout, Rect},
     style::{Color, Modifier, Style},
-    widgets::{
-        Block, Borders, Clear, HighlightSpacing, List, ListItem, Paragraph,
-    },
-    Frame,
+    widgets::{Block, Borders, Clear, HighlightSpacing, List, ListItem, Paragraph},
 };
 
 use crate::ssh::keys::KeyStatus;
@@ -21,7 +19,7 @@ pub fn draw(f: &mut Frame, app: &mut App) {
         .split(f.area());
 
     draw_header(f, chunks[0]);
-    
+
     match app.state {
         AppState::KeyList => draw_key_list(f, app, chunks[1]),
         AppState::KeyDetail => draw_key_detail(f, app, chunks[1]),
@@ -37,7 +35,7 @@ pub fn draw(f: &mut Frame, app: &mut App) {
         }
         AppState::Quit => {}
     }
-    
+
     draw_footer(f, app, chunks[2]);
 
     if app.show_help {
@@ -47,7 +45,11 @@ pub fn draw(f: &mut Frame, app: &mut App) {
 
 fn draw_header(f: &mut Frame, area: Rect) {
     let header = Paragraph::new("SSH Key Manager (skm)")
-        .style(Style::default().fg(Color::Cyan).add_modifier(Modifier::BOLD))
+        .style(
+            Style::default()
+                .fg(Color::Cyan)
+                .add_modifier(Modifier::BOLD),
+        )
         .alignment(Alignment::Center)
         .block(Block::default().borders(Borders::BOTTOM));
     f.render_widget(header, area);
@@ -71,7 +73,7 @@ fn draw_key_list(f: &mut Frame, app: &App, area: Rect) {
                 KeyStatus::Encrypted => "[LOCKED]",
                 _ => "[!]",
             };
-            
+
             let content = format!(
                 " {} {} - {} [{}]",
                 status_symbol,
@@ -79,20 +81,28 @@ fn draw_key_list(f: &mut Frame, app: &App, area: Rect) {
                 key.key_type,
                 key.comment.as_deref().unwrap_or("no comment")
             );
-            
+
             ListItem::new(content).style(Style::default())
         })
         .collect();
 
     let list = List::new(items)
-        .block(Block::default().title(format!("SSH Keys ({})", app.keys.len())).borders(Borders::ALL))
-        .highlight_style(Style::default().bg(Color::DarkGray).add_modifier(Modifier::BOLD))
+        .block(
+            Block::default()
+                .title(format!("SSH Keys ({})", app.keys.len()))
+                .borders(Borders::ALL),
+        )
+        .highlight_style(
+            Style::default()
+                .bg(Color::DarkGray)
+                .add_modifier(Modifier::BOLD),
+        )
         .highlight_spacing(HighlightSpacing::Always)
         .highlight_symbol("> ");
 
     let mut state = ratatui::widgets::ListState::default();
     state.select(Some(app.selected_index));
-    
+
     f.render_stateful_widget(list, area, &mut state);
 }
 
@@ -126,7 +136,7 @@ fn draw_key_detail(f: &mut Frame, app: &App, area: Rect) {
         let paragraph = Paragraph::new(text)
             .block(Block::default().title("Key Details").borders(Borders::ALL))
             .wrap(ratatui::widgets::Wrap { trim: true });
-        
+
         f.render_widget(paragraph, area);
     }
 }
@@ -145,7 +155,8 @@ fn draw_create_wizard(f: &mut Frame, app: &App, area: Rect) {
             "Select key type:\n\n\
              [1] ED25519 (Recommended - modern, fast, secure)\n\
              [2] RSA (4096 bits - for legacy compatibility)\n\n\
-             Press 1 or 2 to select, ESC to cancel".to_string()
+             Press 1 or 2 to select, ESC to cancel"
+                .to_string(),
         ),
         WizardStep::EnterFilename => (
             "Create New Key - Step 2/5",
@@ -154,7 +165,7 @@ fn draw_create_wizard(f: &mut Frame, app: &App, area: Rect) {
                  > {}\n\n\
                  Press Enter to continue, ESC to go back",
                 app.wizard_input
-            )
+            ),
         ),
         WizardStep::EnterComment => (
             "Create New Key - Step 3/5",
@@ -163,9 +174,8 @@ fn draw_create_wizard(f: &mut Frame, app: &App, area: Rect) {
                  > {}\n\n\
                  Default: {}\n\
                  Press Enter to continue, ESC to go back",
-                app.wizard_input,
-                wizard.options.comment
-            )
+                app.wizard_input, wizard.options.comment
+            ),
         ),
         WizardStep::EnterPassphrase => (
             "Create New Key - Step 4/5",
@@ -174,7 +184,7 @@ fn draw_create_wizard(f: &mut Frame, app: &App, area: Rect) {
                  > {}\n\n\
                  Press Enter to continue, ESC to go back",
                 "*".repeat(app.wizard_input.len())
-            )
+            ),
         ),
         WizardStep::Confirm => (
             "Create New Key - Step 5/5",
@@ -183,7 +193,7 @@ fn draw_create_wizard(f: &mut Frame, app: &App, area: Rect) {
                  {}\n\n\
                  Press Enter to create, ESC to go back",
                 wizard.get_summary()
-            )
+            ),
         ),
     };
 
@@ -191,7 +201,7 @@ fn draw_create_wizard(f: &mut Frame, app: &App, area: Rect) {
         .title(title)
         .borders(Borders::ALL)
         .border_style(Style::default().fg(Color::Green));
-    
+
     let paragraph = Paragraph::new(content).block(block);
     f.render_widget(paragraph, area);
 }
@@ -201,17 +211,17 @@ fn draw_export_dialog(f: &mut Frame, app: &App, area: Rect) {
         DialogState::EnterPath => (
             "Export Keys - Path",
             "Enter export path:",
-            app.export_path.clone()
+            app.export_path.clone(),
         ),
         DialogState::EnterPassphrase => (
             "Export Keys - Passphrase",
             "Enter encryption passphrase:",
-            "*".repeat(app.dialog_passphrase.len())
+            "*".repeat(app.dialog_passphrase.len()),
         ),
         DialogState::Confirm => (
             "Export Keys - Confirm",
             "Press Enter to export or ESC to cancel",
-            format!("Path: {} | Keys: {}", app.export_path, app.keys.len())
+            format!("Path: {} | Keys: {}", app.export_path, app.keys.len()),
         ),
     };
 
@@ -219,7 +229,7 @@ fn draw_export_dialog(f: &mut Frame, app: &App, area: Rect) {
         .title(title)
         .borders(Borders::ALL)
         .border_style(Style::default().fg(Color::Blue));
-    
+
     let text = format!("{}\n\n> {}", prompt, value);
     let paragraph = Paragraph::new(text).block(block);
     f.render_widget(paragraph, area);
@@ -230,17 +240,17 @@ fn draw_import_dialog(f: &mut Frame, app: &App, area: Rect) {
         DialogState::EnterPath => (
             "Import Keys - Path",
             "Enter path to .skm file:",
-            app.import_path.clone()
+            app.import_path.clone(),
         ),
         DialogState::EnterPassphrase => (
             "Import Keys - Passphrase",
             "Enter decryption passphrase:",
-            "*".repeat(app.dialog_passphrase.len())
+            "*".repeat(app.dialog_passphrase.len()),
         ),
         DialogState::Confirm => (
             "Import Keys - Confirm",
             "Press Enter to import or ESC to cancel",
-            format!("Path: {}", app.import_path)
+            format!("Path: {}", app.import_path),
         ),
     };
 
@@ -248,7 +258,7 @@ fn draw_import_dialog(f: &mut Frame, app: &App, area: Rect) {
         .title(title)
         .borders(Borders::ALL)
         .border_style(Style::default().fg(Color::Yellow));
-    
+
     let text = format!("{}\n\n> {}", prompt, value);
     let paragraph = Paragraph::new(text).block(block);
     f.render_widget(paragraph, area);
@@ -259,7 +269,7 @@ fn draw_delete_confirm(f: &mut Frame, app: &App, area: Rect) {
         .get_selected_key()
         .map(|k| k.name.as_str())
         .unwrap_or("selected key");
-    
+
     let text = format!(
         "Are you sure you want to delete '{}'?\n\n\
          This action cannot be undone!\n\n\
@@ -267,16 +277,16 @@ fn draw_delete_confirm(f: &mut Frame, app: &App, area: Rect) {
          [n] No, cancel",
         name
     );
-    
+
     let block = Block::default()
         .title("Confirm Delete")
         .borders(Borders::ALL)
         .border_style(Style::default().fg(Color::Red));
-    
+
     let paragraph = Paragraph::new(text)
         .block(block)
         .alignment(Alignment::Center);
-    
+
     f.render_widget(paragraph, area);
 }
 
@@ -298,7 +308,7 @@ fn draw_footer(f: &mut Frame, app: &App, area: Rect) {
         .style(Style::default().fg(Color::Gray))
         .alignment(Alignment::Center)
         .block(Block::default().borders(Borders::TOP));
-    
+
     f.render_widget(footer, area);
 }
 
@@ -319,13 +329,12 @@ fn draw_help_popup(f: &mut Frame) {
                   d - Delete selected key\n\
                   r - Refresh list";
 
-    let paragraph = Paragraph::new(text)
-        .block(
-            Block::default()
-                .title("Help")
-                .borders(Borders::ALL)
-                .border_style(Style::default().fg(Color::Cyan)),
-        );
+    let paragraph = Paragraph::new(text).block(
+        Block::default()
+            .title("Help")
+            .borders(Borders::ALL)
+            .border_style(Style::default().fg(Color::Cyan)),
+    );
 
     let area = centered_rect(60, 70, f.area());
     f.render_widget(Clear, area);
@@ -342,7 +351,7 @@ fn draw_message(f: &mut Frame, msg: &str, msg_type: MessageType) {
     let block = Block::default()
         .borders(Borders::ALL)
         .border_style(Style::default().fg(color));
-    
+
     let paragraph = Paragraph::new(msg)
         .block(block)
         .alignment(Alignment::Center);

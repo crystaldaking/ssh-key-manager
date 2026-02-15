@@ -1,5 +1,5 @@
-use crate::ssh::keys::KeyType;
 use crate::ssh::generate::KeyGenOptions;
+use crate::ssh::keys::KeyType;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum WizardStep {
@@ -51,7 +51,7 @@ impl CreateWizard {
             self.error_message = Some("Filename cannot be empty".to_string());
             return false;
         }
-        
+
         if filename.contains('/') || filename.contains('\\') {
             self.error_message = Some("Filename cannot contain path separators".to_string());
             return false;
@@ -83,7 +83,7 @@ impl CreateWizard {
         } else {
             Some(passphrase.to_string())
         };
-        
+
         self.error_message = None;
         true
     }
@@ -131,7 +131,11 @@ impl CreateWizard {
             self.options.key_type,
             self.options.filename,
             self.options.comment,
-            if self.options.passphrase.is_some() { "Yes" } else { "No" }
+            if self.options.passphrase.is_some() {
+                "Yes"
+            } else {
+                "No"
+            }
         )
     }
 }
@@ -172,13 +176,13 @@ mod tests {
     #[test]
     fn test_set_filename_validation() {
         let mut wizard = CreateWizard::new();
-        
+
         assert!(!wizard.set_filename(""));
         assert!(wizard.error_message.is_some());
-        
+
         assert!(!wizard.set_filename("path/to/key"));
         assert!(wizard.error_message.is_some());
-        
+
         assert!(wizard.set_filename("my_key"));
         assert!(wizard.error_message.is_none());
         assert_eq!(wizard.options.filename, "my_key");
@@ -187,16 +191,16 @@ mod tests {
     #[test]
     fn test_passphrase_validation() {
         let mut wizard = CreateWizard::new();
-        
+
         // Mismatched passphrases
         assert!(!wizard.set_passphrase("secret", "different"));
         assert!(wizard.error_message.is_some());
-        
+
         // Matching passphrases
         assert!(wizard.set_passphrase("secret", "secret"));
         assert!(wizard.error_message.is_none());
         assert_eq!(wizard.options.passphrase, Some("secret".to_string()));
-        
+
         // Empty passphrase (no encryption)
         assert!(wizard.set_passphrase("", ""));
         assert_eq!(wizard.options.passphrase, None);
@@ -205,15 +209,15 @@ mod tests {
     #[test]
     fn test_step_navigation() {
         let mut wizard = CreateWizard::new();
-        
+
         assert!(matches!(wizard.step, WizardStep::SelectType));
-        
+
         wizard.next_step();
         assert!(matches!(wizard.step, WizardStep::EnterFilename));
-        
+
         wizard.next_step();
         assert!(matches!(wizard.step, WizardStep::EnterComment));
-        
+
         wizard.previous_step();
         assert!(matches!(wizard.step, WizardStep::EnterFilename));
     }

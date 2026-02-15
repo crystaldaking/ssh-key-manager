@@ -2,17 +2,17 @@ use clap::Parser;
 use crossterm::{
     event::{DisableMouseCapture, EnableMouseCapture},
     execute,
-    terminal::{disable_raw_mode, enable_raw_mode, EnterAlternateScreen, LeaveAlternateScreen},
+    terminal::{EnterAlternateScreen, LeaveAlternateScreen, disable_raw_mode, enable_raw_mode},
 };
-use ratatui::{backend::CrosstermBackend, Terminal};
+use ratatui::{Terminal, backend::CrosstermBackend};
 use std::io;
 use tracing::{error, info};
 
 use ssh_key_manager::{
+    Result,
     cli::{Cli, CliExecutor},
     config::Config,
     tui::{app::App, events::handle_events, ui::draw},
-    Result,
 };
 
 fn main() -> Result<()> {
@@ -36,7 +36,7 @@ fn main() -> Result<()> {
         // CLI mode
         info!("Running in CLI mode");
         let executor = CliExecutor::new(config);
-        
+
         match executor.execute(command) {
             Ok(()) => {
                 info!("CLI command completed successfully");
@@ -92,10 +92,7 @@ fn run_tui(config: Config) -> Result<()> {
     }
 }
 
-fn run_app<B: ratatui::backend::Backend>(
-    terminal: &mut Terminal<B>,
-    app: &mut App,
-) -> Result<()> {
+fn run_app<B: ratatui::backend::Backend>(terminal: &mut Terminal<B>, app: &mut App) -> Result<()> {
     let mut last_tick = std::time::Instant::now();
     let tick_rate = std::time::Duration::from_millis(250);
 

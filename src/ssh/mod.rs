@@ -1,7 +1,7 @@
-pub mod keys;
 pub mod generate;
+pub mod keys;
 pub mod scan;
 
-pub use keys::{SshKey, KeyType, KeyStatus};
 pub use generate::KeyGenerator;
+pub use keys::{KeyStatus, KeyType, SshKey};
 pub use scan::KeyScanner;
